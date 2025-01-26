@@ -1,0 +1,7 @@
+{
+  "build": {
+    "base": "node",
+    "install": "npm install",
+    "start": "npm start"
+  }
+}
