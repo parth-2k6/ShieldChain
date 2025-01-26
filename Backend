@@ -1,0 +1,30 @@
+const express = require('express');
+const cors = require('cors');
+const { exec } = require('child_process');
+const fs = require('fs');
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
+
+// API Endpoint to Scan Smart Contracts
+app.post('/scan', (req, res) => {
+    const { contractCode } = req.body;
+    if (!contractCode) return res.status(400).json({ error: 'Smart contract code is required' });
+
+    // Save contract code to a temporary Solidity file
+    fs.writeFileSync('temp.sol', contractCode);
+
+    // Run Slither for security analysis
+    exec('slither temp.sol --json result.json', (error, stdout, stderr) => {
+        if (error) {
+            return res.status(500).json({ error: 'Slither analysis failed', details: stderr });
+        }
+        
+        const result = fs.readFileSync('result.json', 'utf8');
+        res.json(JSON.parse(result));
+    });
+});
+
+app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
