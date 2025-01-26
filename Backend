@@ -1,3 +1,4 @@
+// server.js (Node.js Backend for ShieldChain Security Scanner)
 const express = require('express');
 const cors = require('cors');
 const { exec } = require('child_process');
@@ -13,18 +14,19 @@ app.post('/scan', (req, res) => {
     const { contractCode } = req.body;
     if (!contractCode) return res.status(400).json({ error: 'Smart contract code is required' });
 
-    // Save contract code to a temporary Solidity file
     fs.writeFileSync('temp.sol', contractCode);
 
-    // Run Slither for security analysis
     exec('slither temp.sol --json result.json', (error, stdout, stderr) => {
         if (error) {
             return res.status(500).json({ error: 'Slither analysis failed', details: stderr });
         }
-        
         const result = fs.readFileSync('result.json', 'utf8');
         res.json(JSON.parse(result));
     });
 });
 
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.get('/', (req, res) => {
+    res.send('ShieldChain Backend is Running!');
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
